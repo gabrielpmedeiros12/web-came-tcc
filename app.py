@@ -1,5 +1,5 @@
 # =============================================================
-# MÓDULO: app.py (APLICAÇÃO WEB STREAMLIT v2.0)
+# MÓDULO: app.py (APLICAÇÃO WEB STREAMLIT)
 # =============================================================
 # RESPONSABILIDADE:
 # - Criar uma interface web interativa para análise de came-seguidor
@@ -12,8 +12,6 @@ import streamlit as st
 import numpy as np
 import sys
 import os
-# sys.path.append('/home/ubuntu/upload')
-
 import estruturas
 import motor_calculo
 import config
@@ -181,8 +179,6 @@ for i in range(num_trechos):
             )
         
         with col2:
-            # Cria uma chave dinâmica amarrada ao valor do ângulo.
-            # Se o ângulo mudar, a chave muda, forçando o Streamlit a atualizar o visual.
             chave_dinamica = f"theta_i_{i}_{angulo_final_anterior}"
             
             st.text_input(
@@ -303,10 +299,8 @@ for tipo, msg in mensagens_validacao:
 st.markdown("---")
 
 
-# --- PROTEÇÃO CONTRA (STALE STATE): watchdog ---
-
+# WatchDog
 if st.session_state.get('processado', False):
-    # Compara os parâmetros atuais da tela com os parâmetros salvos na memória
     mudou_estado = (
         st.session_state.get('raio_base') != raio_base or
         st.session_state.get('raio_rolete') != raio_rolete or
@@ -317,7 +311,6 @@ if st.session_state.get('processado', False):
     )
     
     if mudou_estado:
-        # Se qualquer coisa mudou, invalidamos os resultados antigos imediatamente
         st.session_state.processado = False
         st.warning("⚠️ Parâmetros alterados! Os resultados anteriores foram ocultados por segurança. Clique em 'Processar Análise' para recalcular.")
 
@@ -355,7 +348,6 @@ if processar_btn or gerar_pdf_btn:
             # Se o botão de PDF foi pressionado, gerar o PDF
             if gerar_pdf_btn:
                 with st.spinner("Gerando relatório PDF..."):
-                    # Recebemos o buffer em memória, sem precisar inventar nomes aleatórios
                     pdf_buffer = visualizacao_web.gerar_relatorio_pdf(
                         segmentos=lista_segmentos,
                         tipo_analise=tipo_analise,
@@ -415,7 +407,7 @@ if 'processado' in st.session_state and st.session_state.processado:
     unidade_a = "mm/s²" if is_cinematico else "mm/rad²"
     unidade_j = "mm/s³" if is_cinematico else "mm/rad³"
     
-    # Renderização dos Cards (Métricas)
+   
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric(label="S_MAX (Deslocamento)", value=f"{s_max:.2f} mm")
@@ -426,7 +418,7 @@ if 'processado' in st.session_state and st.session_state.processado:
     with col4:
         st.metric(label="|J|_MAX (Pulso)", value=f"{j_max:.2f} {unidade_j}")
         
-    st.markdown("<br>", unsafe_allow_html=True) # Espaçamento elegante antes das abas
+    st.markdown("<br>", unsafe_allow_html=True) 
     
     
     # Tabs para organizar os resultados
@@ -467,7 +459,6 @@ if 'processado' in st.session_state and st.session_state.processado:
     
     with tab_objects[2]:
         st.subheader("Perfil do Came")
-        # Usar a última lei de movimento para o perfil
         ultima_lei = st.session_state.leis_selecionadas[-1]
         fig_perfil = visualizacao_web.plotar_perfil_came_web(
             st.session_state.resultados_por_lei[ultima_lei],
@@ -483,8 +474,6 @@ if 'processado' in st.session_state and st.session_state.processado:
     
     with tab_objects[3]:
         st.subheader("Animação do Mecanismo Came-Seguidor")
-        
-        # Seletor de lei de movimento para a animação
         lei_animacao = st.selectbox(
             "Escolha a lei de movimento para a animação:",
             options=st.session_state.leis_selecionadas,
@@ -504,7 +493,6 @@ if 'processado' in st.session_state and st.session_state.processado:
                         st.session_state.raio_base,
                         st.session_state.raio_rolete,
                         lei_animacao
-                        # O parâmetro filename foi removido
                     )
                     
                     if gif_buffer is not None:
@@ -514,14 +502,13 @@ if 'processado' in st.session_state and st.session_state.processado:
                         st.error("Erro ao gerar animação.")
                 except Exception as e:
                     st.error(f"Erro ao gerar animação: {str(e)}")
-        
-        # Verifica diretamente se o buffer está na memória da sessão
+                    
         if 'gif_buffer' in st.session_state:
             st.image(st.session_state.gif_buffer, caption="Animação do Mecanismo Came-Seguidor", use_container_width=True)
             
             if st.button("⏹️ Parar Animação", key="parar_animacao", use_container_width=True):
                 del st.session_state.gif_buffer
-                st.rerun() # Função oficial e atualizada do Streamlit
+                st.rerun() 
         else:
             st.info("Clique no botão acima para gerar a animação.")
 
