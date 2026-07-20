@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 # --------------------------------------------------------------------------
-# MÓDULO: motor_calculo.py (VERSÃO 2.1 - CORRIGIDA)
+# MÓDULO: motor_calculo.py (
 # --------------------------------------------------------------------------
 import numpy as np
 from typing import List, Dict
 import estruturas
 
-# --- As funções de cálculo (_calcular_mhs_svaj, etc.) permanecem as mesmas ---
 def _calcular_mhs_svaj(theta_rad_trecho: np.ndarray, seg: estruturas.SegmentoCame) -> tuple:
     H = seg.H
     beta_rad = np.deg2rad(seg.beta)
@@ -64,9 +63,7 @@ FUNCOES_MOVIMENTO = {
 }
 
 def processar_perfil_completo(segmentos: List[estruturas.SegmentoCame], lei_movimento_global: str, rpm: float, tipo_analise: str) -> Dict[str, np.ndarray]:
-    # 1. Preparação dos arrays e constantes
     omega = rpm * 2 * np.pi / 60.0
-    #num_pontos = 360 * 2 + 1
     num_pontos = 3600 + 1
     pontos_por_grau = (num_pontos - 1) / 360.0
     
@@ -80,16 +77,12 @@ def processar_perfil_completo(segmentos: List[estruturas.SegmentoCame], lei_movi
 
     # 2. Iteração sobre cada segmento para preencher os arrays
     for i, seg in enumerate(segmentos):
-        # --- CORREÇÃO: Cálculo direto dos índices ---
         start_idx = int(round(seg.theta_inicio * pontos_por_grau))
         end_idx = int(round(seg.theta_fim * pontos_por_grau))
-        
-        # Garante que o último ponto (360°) seja incluído no último segmento
         if i == len(segmentos) - 1:
             end_idx = num_pontos -1
 
         indices = np.arange(start_idx, end_idx + 1)
-        # Previne que o mesmo índice seja pego duas vezes (exceto o primeiro ponto)
         if i > 0:
             indices = indices[1:]
 
