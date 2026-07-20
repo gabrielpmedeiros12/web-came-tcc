@@ -1,15 +1,15 @@
 # =============================================================
-# MÓDULO: visualizacao_web.py (VERSÃO WEB - STREAMLIT v2.0)
+# MÓDULO: visualizacao_web.py
 # =============================================================
 # RESPONSABILIDADE:
 # - Gerar visualizações adaptadas para o Streamlit
-# - Retornar figuras matplotlib para exibição na web
+# - Retornar figuras para exibição na web
 # - Gerar animações em formato GIF para o Streamlit
 # - Gerar relatórios PDF completos
 # =============================================================
 
 import matplotlib
-matplotlib.use("Agg")  # Backend não-interativo para web
+matplotlib.use("Agg")  
 
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
@@ -29,20 +29,18 @@ import estruturas
 import streamlit as st
 from datetime import datetime
 
-# --- NOVA FUNÇÃO (não altera nenhuma lógica existente) ---
+
 def _limpar_zero(valor, tol=1e-6):
     return 0.0 if abs(valor) < tol else valor
 
 
 def _salvar_texto_em_pdf(pdf_pages, texto, titulo):
     """Função auxiliar para criar uma página de texto no PDF."""
-    # Usando a classe Figure diretamente (Thread-safe)
     fig = Figure(figsize=(8.27, 11.69))  # Tamanho A4
     fig.suptitle(titulo, fontsize=16, weight='bold')
     fig.text(0.05, 0.90, texto, ha='left', va='top', wrap=True, fontsize=10, fontfamily='monospace')
     if pdf_pages:
         pdf_pages.savefig(fig)
-    # plt.close(fig) não é mais necessário, pois o garbage collector do Python limpa a Figure
 
 def gerar_tabela_resultados(resultados: Dict[str, np.ndarray], segmentos: List[estruturas.SegmentoCame], lei_movimento: str, rpm: float, tipo_analise: str) -> pd.DataFrame:
     """
@@ -64,7 +62,7 @@ def gerar_tabela_resultados(resultados: Dict[str, np.ndarray], segmentos: List[e
         idx = np.argmin(np.abs(theta_total - angulo))
         s_val, v_val, a_val, j_val = s_total[idx], v_total[idx], a_total[idx], j_total[idx]
 
-        # --- CORREÇÃO DO -0.00 ---
+       
         s_val = _limpar_zero(s_val)
         v_val = _limpar_zero(v_val)
         a_val = _limpar_zero(a_val)
@@ -99,11 +97,11 @@ def plotar_svaj_web(resultados: Dict[str, np.ndarray], lei_movimento: str, tipo_
         titulo_principal = f'Diagramas para o Movimento: {lei_movimento.upper()}'
         label_v, label_a, label_j = "V (mm/rad)", "A (mm/rad²)", "J (mm/rad³)"
 
-    # Criação do grid 2x2 interativo
+    
     fig = make_subplots(
         rows=2, cols=2,
         subplot_titles=("Deslocamento (S)", "Velocidade (V)", "Aceleração (A)", "Pulso (J)"),
-        shared_xaxes=True, # Garante que o zoom no eixo X aplique a todos os gráficos
+        shared_xaxes=True, 
         vertical_spacing=0.15
     )
 
@@ -128,11 +126,11 @@ def plotar_svaj_web(resultados: Dict[str, np.ndarray], lei_movimento: str, tipo_
         hovermode="x unified", 
         showlegend=False,
         margin=dict(l=40, r=40, t=80, b=40),
-        plot_bgcolor='rgba(15, 15, 25, 0.8)', # Fundo dos gráficos levemente azulado/escuro (estilo HUD)
-        paper_bgcolor='rgba(0, 0, 0, 0)'      # Fundo externo transparente para mesclar com o Streamlit
+        plot_bgcolor='rgba(15, 15, 25, 0.8)',
+        paper_bgcolor='rgba(0, 0, 0, 0)'      
     )
     
-    # Customização extra para as linhas de grade ficarem sutis
+    # Customização linhas grades 
     fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='rgba(255, 255, 255, 0.1)')
     fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(255, 255, 255, 0.1)')
 
@@ -149,7 +147,7 @@ def plotar_svaj_web(resultados: Dict[str, np.ndarray], lei_movimento: str, tipo_
 def plotar_svaj_pdf(resultados: Dict[str, np.ndarray], lei_movimento: str, tipo_analise: str, segmentos: List[estruturas.SegmentoCame] = None):
     """
     Gera gráficos estáticos e tradicionais (Matplotlib) exclusivos para o relatório PDF.
-    Fundo branco, alto contraste, próprio para impressão e artigos ABNT.
+    Fundo branco, alto contraste, próprio para impressão
     """
     if resultados is None:
         return None
@@ -166,15 +164,15 @@ def plotar_svaj_pdf(resultados: Dict[str, np.ndarray], lei_movimento: str, tipo_
         titulo_v, titulo_a, titulo_j = "Velocidade (V)", "Aceleração(A)", "Jerk(J)"
         label_v, label_a, label_j = "V (mm/rad)", "A (mm/rad²)", "J (mm/rad³)"
     
-    # Usa a Figure do Matplotlib (Thread-safe)
+    
     fig = Figure(figsize=(10, 6))
-    # Força o fundo branco explicitamente
+    
     fig.patch.set_facecolor('white') 
     
     axs = fig.subplots(2, 2, sharex=True)
     fig.suptitle(titulo_principal, fontsize=14, fontweight='bold', color='black')
     
-    # Cores fechadas e tradicionais para papel
+   
     axs[0, 0].plot(theta, s, color='black', linewidth=1.5)
     axs[0, 0].set_title('Deslocamento (S)', fontsize=12)
     axs[0, 0].set_ylabel('S (mm)', fontsize=10)
@@ -211,7 +209,7 @@ def plotar_perfil_came_web(resultados: Dict[str, np.ndarray], raio_base: float, 
     deslocamento = resultados['s']
     raio_perfil = raio_base + deslocamento
     
-    # Usando a classe Figure (Thread-safe)
+    
     fig = Figure(figsize=(6, 6))
     ax = fig.add_subplot(111, projection='polar')
     
@@ -225,7 +223,6 @@ def plotar_perfil_came_web(resultados: Dict[str, np.ndarray], raio_base: float, 
     return fig
 
 @st.cache_data(show_spinner=False)
-# o codido original gerar_animacao_gif está sakvo no notion 
 def gerar_animacao_gif(resultados: Dict[str, np.ndarray], raio_base: float, raio_rolete: float, lei_movimento: str, filename: str = "animacao_came.gif"):
     if resultados is None:
         return None
@@ -291,25 +288,25 @@ def gerar_animacao_gif(resultados: Dict[str, np.ndarray], raio_base: float, raio
     ani = animation.FuncAnimation(fig, update, frames=frames_indices,
                                   init_func=init, blit=True, interval=50)
     
-    # Cria um caminho temporário seguro que o sistema operacional gerencia
+    
     with tempfile.NamedTemporaryFile(suffix=".gif", delete=False) as tmpfile:
         caminho_temporario = tmpfile.name
     
     try:
-        # 1. Matplotlib salva no disco temporário (satisfazendo a exigência da biblioteca)
+        
         ani.save(caminho_temporario, writer='pillow', fps=20, dpi=80)
         plt.close(fig)
         
-        # 2. Lemos os bytes do arquivo físico direto para a memória RAM
+       
         with open(caminho_temporario, "rb") as f:
             gif_bytes = f.read()
             
     finally:
-        # 3. Deletamos o arquivo físico IMEDIATAMENTE após a leitura (Garantindo Zero Vazamento)
+        
         if os.path.exists(caminho_temporario):
             os.remove(caminho_temporario)
     
-    # Retornamos apenas os bytes puros em memória para o Streamlit renderizar
+    
     return gif_bytes
 
 def gerar_relatorio_pdf(
@@ -327,7 +324,7 @@ def gerar_relatorio_pdf(
     buffer_pdf = io.BytesIO()
     pdf_pages = PdfPages(buffer_pdf)
     
-    # Tradução da variável interna para o termo da literatura
+    
     nome_analise_pdf = "Em função do tempo" if tipo_analise == 'cinematico' else "Em função do ângulo"
     
     # Página de rosto
