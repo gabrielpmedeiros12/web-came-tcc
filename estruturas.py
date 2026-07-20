@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# --------------------------------------------------------------------------
 # MÓDULO: estruturas.py
 # --------------------------------------------------------------------------
 # RESPONSABILIDADE:
@@ -25,8 +24,4 @@ class SegmentoCame:
         """Calcula e retorna a duração angular (beta) do segmento em graus."""
         return self.theta_fim - self.theta_inicio
 
-    # O @dataclass gera automaticamente os métodos:
-    # __init__(self, tipo, ...): O construtor da classe.
-    # __repr__(self): Uma representação textual do objeto, ótima para debug.
-    #   É por isso que o `print(seg)` no orquestrador funcionará tão bem.
-    # __eq__(self, other): Para comparar dois objetos.
+   
